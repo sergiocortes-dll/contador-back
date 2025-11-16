@@ -9,7 +9,7 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        string conn = configuration.GetConnectionString("DefaultConnection")!;
+        string conn = Environment.GetEnvironmentVariable("DB") ?? configuration.GetConnectionString("DefaultConnection")!;
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseMySql(
