@@ -21,14 +21,17 @@ builder.Services.AddScoped<ICounterService, CounterService>();
 builder.Services.AddScoped<IReasonRespository, ReasonRepository>();
 builder.Services.AddScoped<IReasonService, ReasonService>();
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+                     ?? new[] { "https://contador-front.vercel.app", "http://localhost:3000" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowDevOrigin", policy =>
+    options.AddPolicy("AllowConfiguredOrigins", policy =>
     {
-        policy
-            .AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -42,10 +45,10 @@ if (app.Environment.IsDevelopment())
     app.UseCors("AllowDevOrigin");
 }
 
+app.UseCors("AllowConfiguredOrigins");
+
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
