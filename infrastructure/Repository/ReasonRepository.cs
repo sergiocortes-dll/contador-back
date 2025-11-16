@@ -37,9 +37,32 @@ public class ReasonRepository : IReasonRespository
         return await  _context.reason.FindAsync(id);
     }
 
+    public async Task<Reason?> GetGeneral(int id)
+    {
+        return await _context.reason.FirstOrDefaultAsync(r => r.CounterId == id && r.Name == "General");
+    }
+
     public async Task<List<Reason>> GetAll()
     {
         return await _context.reason.ToListAsync();
+    }
+
+    public async Task<List<Reason>> GetReasonsByCounterId(int counterId)
+    {
+        return await _context.reason
+            .Where(r => r.CounterId == counterId)
+            .ToListAsync();
+    }
+
+    public async Task<bool> IncrementCount(int reasonId)
+    {
+        var reason = await _context.reason.FindAsync(reasonId);
+        if (reason == null)
+            return false;
+
+        reason.Count++;
+
+        return true;
     }
 
     public async Task<bool> SaveAsync()

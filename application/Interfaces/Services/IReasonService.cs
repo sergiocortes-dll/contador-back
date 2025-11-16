@@ -9,5 +9,8 @@ public interface IReasonService
     Task<bool> Update(Reason reason);
     Task<bool> Delete(Reason reason);
     Task<Reason?> GetById(int id);
+    Task<List<Reason>> GetByCounter(int id);
     Task<List<Reason>> GetAll();
+    Task<bool> IncrementCount(int reasonId, int counterId);
+
 }

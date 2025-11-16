@@ -48,8 +48,28 @@ public class ReasonService : IReasonService
         return reason;
     }
 
+    public async Task<List<Reason>> GetByCounter(int id)
+    {
+        return await _repo.GetReasonsByCounterId(id);
+    }
+
     public async Task<List<Reason>> GetAll()
     {
         return await _repo.GetAll();
+    }
+
+    public async Task<bool> IncrementCount(int reasonId, int counterId)
+    {
+        if (reasonId == 0)
+        {
+            var generalReason = await _repo.GetGeneral(counterId);
+            await _repo.IncrementCount(generalReason.Id);
+        }
+        else
+        {
+            await _repo.IncrementCount(reasonId);
+        }
+        await _repo.SaveAsync();
+        return true;
     }
 }

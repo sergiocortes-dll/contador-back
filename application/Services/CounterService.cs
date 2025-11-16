@@ -8,24 +8,53 @@ namespace application.Services;
 public class CounterService : ICounterService
 {
     private readonly ICounterRepository _repo;
+    private readonly IReasonRespository _repoReason;
 
-    public CounterService(ICounterRepository repo)
+    public CounterService(ICounterRepository repo, IReasonRespository repoReason)
     {
         _repo = repo;
+        _repoReason = repoReason;
     }
     
     public async Task<Counter> Add(CounterCreateDto counter)
     {
-        var c = new Counter
+        if (counter == null)
+            throw new ArgumentNullException(nameof(counter));
+
+        if (string.IsNullOrWhiteSpace(counter.Name))
+            throw new ArgumentException("Counter name is required", nameof(counter.Name));
+
+        if (string.IsNullOrWhiteSpace(counter.CreatedBy))
+            throw new ArgumentException("CreatedBy is required", nameof(counter.CreatedBy));
+
+        try
         {
-            Name = counter.Name,
-            Description = counter.Description,
-            CreatedBy = counter.CreatedBy
-        };
+            var newCounter = new Counter
+            {
+                Name = counter.Name.Trim(),
+                Description = counter.Description?.Trim() ?? string.Empty,
+                CreatedBy = counter.CreatedBy.Trim()
+            };
         
-        await _repo.Add(c);
-        await _repo.SaveAsync();
-        return c;
+            await _repo.Add(newCounter);
+            await _repo.SaveAsync();
+
+            var defaultReason = new Reason
+            {
+                Name = "General",
+                Count = 1,
+                CounterId = newCounter.Id,
+            };
+
+            await _repoReason.Add(defaultReason);
+            await _repoReason.SaveAsync();
+
+            return newCounter;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Failed to create counter: {ex.Message}", ex);
+        }
     }
 
     public async Task<bool> Update(Counter counter)
