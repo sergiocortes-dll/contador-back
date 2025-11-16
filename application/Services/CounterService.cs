@@ -42,7 +42,7 @@ public class CounterService : ICounterService
             var defaultReason = new Reason
             {
                 Name = "General",
-                Count = 1,
+                Count = 0,
                 CounterId = newCounter.Id,
             };
 
